@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PORT: ${{ secrets.PORT }}
-      MONGO_URI: ${{ secrets.MONGO_URI }}
+      MONGO_URI: mongodb://mongo:27017/todo
     services:
       mongo:
         image: mongo
