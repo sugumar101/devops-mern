@@ -24,16 +24,22 @@ jobs:
           node-version: 18
       - name: Waiting for MongoDB to start
         run: |
+          ATTEMPTS=0
           until nc -z localhost 27017; do
             echo "Waiting for MongoDB to start..."
-            sleep 2
+            sleep 3
+            ATTEMPTS=$((ATTEMPTS+1))
+            if [ $ATTEMPTS -ge 20 ]; then
+              echo "MongoDB did not start in time" >&2
+              exit 1
+            fi
           done
           echo "MongoDB started"
       - name: Seed MongoDB
         working-directory: ./backend
         run: |
           npm install
-          node seedTasksData.js
+          node seedTasksData.js || (echo "Seeding failed, printing MongoDB logs:" && docker logs $(docker ps -q --filter ancestor=mongo) && exit 1)
       - name: Run Backend Tests
         working-directory: ./backend
         run: npm test
